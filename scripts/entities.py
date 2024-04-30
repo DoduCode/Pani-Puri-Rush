@@ -7,12 +7,41 @@ class HandSpanwer:
         self.game = game
         self.count = count
 
+        self.hand_list = []
+
+    def spawn_hand(self):
+        self.new_hand_pos = self.game.hands[-1]
+        if not self.new_hand_pos.flip and not self.new_hand_pos.rotate:
+            if (self.new_hand_pos.pos[1] - 20 - 56) >= (162 + 20):  # 162 is how far the hand moves while bobbing, 20 is the padding
+                self.new_hand = Hand(self.game, (0, self.new_hand_pos.pos[1] - 20 - 56), (164, 56))
+
+            else:
+                self.new_hand = Hand(self.game, (20, 0), (164, 56), rotate = True)
+
+        elif self.new_hand_pos.rotate:
+            if (self.new_hand_pos.pos[0] + 20 + 56) <= (self.game.win_size[0] - 20):
+                self.new_hand = Hand(self.game, (self.new_hand_pos.pos[0] + 20 + 56, 0 - 20), (164, 56), rotate = True)
+
+            else:
+                self.new_hand = Hand(self.game, (self.game.win_size[0] - 164, 162 + 20), (164, 56), flip = True)
+
+        elif self.new_hand_pos.flip:
+            if (self.new_hand_pos.pos[1] + 20 + 56) <= (self.game.win_size[1] - 20 - 56):
+                self.new_hand = Hand(self.game, (self.game.win_size[0] - 164, self.new_hand_pos.pos[1] + 20 + 56), (164, 56), flip = True)
+
+            else:
+                print("No more spots available")
+
+        if self.new_hand != self.new_hand_pos:
+            self.game.hands.append(self.new_hand)
+
 class Hand:
-    def __init__(self, game, pos, size, flip = [False, False]):
+    def __init__(self, game, pos, size, flip = False, rotate = False):
         self.game = game
         self.pos = list(pos)
         self.size = size
         self.flip = flip
+        self.rotate = rotate
 
         self.img = self.game.assets['hands'][random.randint(0, 3)]
 
@@ -21,18 +50,45 @@ class Hand:
         self.movement = [1, 0]
 
     def rect(self):
-        return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
+        if not self.rotate:
+            return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
+
+        if self.rotate:
+            return pygame.Rect(self.pos[0], self.pos[1], self.size[1], self.size[0])
 
     def move_hand(self):
-        if self.movement[0]:
-            self.pos[0] += 1
-            if self.rect().centerx >= 80:
-                self.movement = [0, 1]
+        if not self.rotate and not self.flip:
+            if self.movement[0]:
+                self.pos[0] += 1
+                if self.rect().centerx >= 80:
+                    self.movement = [0, 1]
 
-        if self.movement[1]:
-            self.pos[0] -= 1
-            if self.rect().centerx <= 20:
-                self.movement = [1, 0]
+            if self.movement[1]:
+                self.pos[0] -= 1
+                if self.rect().centerx <= 20:
+                    self.movement = [1, 0]
+
+        if self.rotate:
+            if self.movement[0]:
+                self.pos[1] += 1
+                if self.rect().centery >= 80:
+                    self.movement = [0, 1]
+
+            if self.movement[1]:
+                self.pos[1] -= 1
+                if self.rect().centery <= 20:
+                    self.movement = [1, 0]
+
+        if self.flip:
+            if self.movement[0]:
+                self.pos[0] -= 1
+                if self.rect().centerx <= (self.game.win_size[0] - 80):
+                    self.movement = [0, 1]
+
+            if self.movement[1]:
+                self.pos[0] += 1
+                if self.rect().centerx >= (self.game.win_size[0] - 20):
+                    self.movement = [1, 0]
 
     def update(self):
         if not (self.has_plate[1] is None):
@@ -50,7 +106,14 @@ class Hand:
             self.move_hand()
 
     def render(self, surf):
-        surf.blit(pygame.transform.scale(self.img, self.size), self.pos)
+        if not self.rotate and not self.flip:
+            surf.blit(pygame.transform.scale(self.img, self.size), self.pos)
+
+        if self.rotate:
+            surf.blit(pygame.transform.rotate(pygame.transform.scale(self.img, self.size), -90), self.pos)
+
+        if self.flip:
+            surf.blit(pygame.transform.flip(pygame.transform.scale(self.img, self.size), self.flip, False), self.pos)
 
 class Plate:
     def __init__(self, game, pos, size):
