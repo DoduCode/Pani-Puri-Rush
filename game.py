@@ -3,12 +3,12 @@ import sys
 import pygame
 
 from scripts.utils import load_image, load_images
-from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand
-
+from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand, HandSpanwer
+   
 """
 To-Do List:
 (now)
-• Make the hand spawner  •••
+• Make the hand spawner  ••• ( Done )
 • Make more hand colors  • ( Done )
 • Randomize the color of the hand  •• ( Done )
 • Create a specific station for the papu is next state  •••••
@@ -38,12 +38,16 @@ class Game:
         pygame.display.set_caption("Pani Puri Rush")
         self.display = pygame.display.set_mode((400, 560))
 
+        self.win_size = [400, 560]
+
         self.assets = {
             'plate': load_image("plate/plate.png"),
             'papus': load_images("panipuri"),
             'bags': load_images("panipuribag"),
             'hands': load_images("hands"),
         }
+
+        self.hand_spawner = HandSpanwer(self)
 
         self.hands = [Hand(self, (0, 300), (164, 56))]
 
@@ -79,17 +83,42 @@ class Game:
                 plate.update()
                 if not plate.on_hand[0]:
                     for hand in self.hands:
-                        if plate.rect().collidepoint((hand.rect().centerx + 30, hand.rect().centery - 10)):
-                            plate.render(self.display, (hand.rect().centerx + 30, hand.rect().centery - 10))
-                            plate.on_hand = [True, hand]
-                            hand.has_plate = [True, plate]
+                        if not hand.flip and not hand.rotate:
+                            if plate.rect().collidepoint((hand.rect().centerx + 30, hand.rect().centery - 20)):
+                                plate.render(self.display, (hand.rect().centerx + 30, hand.rect().centery - 20))
+                                plate.on_hand = [True, hand]
+                                hand.has_plate = [True, plate]
 
-                        else:
-                            plate.render(self.display, plate.pos)
+                            else:
+                                plate.render(self.display, plate.pos)
+
+                        elif hand.rotate:
+                            if plate.rect().collidepoint((hand.rect().centerx - 30, hand.rect().centery + 30)):
+                                plate.render(self.display, (hand.rect().centerx - 30, hand.rect().centery + 30))
+                                plate.on_hand = [True, hand]
+                                hand.has_plate = [True, plate]
+
+                            else:
+                                plate.render(self.display, plate.pos)
+
+                        elif hand.flip:
+                            if plate.rect().collidepoint((hand.rect().centerx - 30, hand.rect().centery - 20)):
+                                plate.render(self.display, (hand.rect().centerx - 30, hand.rect().centery - 20))
+                                plate.on_hand = [True, hand]
+                                hand.has_plate = [True, plate]
+
+                            else:
+                                plate.render(self.display, plate.pos)
 
                 else:
-                    plate.render(self.display, (plate.on_hand[1].rect().centerx + 30, plate.on_hand[1].rect().centery - 10))
+                    if not plate.on_hand[1].flip and not plate.on_hand[1].rotate:
+                        plate.render(self.display, (plate.on_hand[1].rect().centerx + 30, plate.on_hand[1].rect().centery - 20))
 
+                    elif plate.on_hand[1].rotate:
+                        plate.render(self.display, (plate.on_hand[1].rect().centerx - 30, plate.on_hand[1].rect().centery + 30))
+                    
+                    elif plate.on_hand[1].flip:
+                        plate.render(self.display, (plate.on_hand[1].rect().centerx - 80, plate.on_hand[1].rect().centery - 20))
 
             # renders the pani puri bags
             for papu_bag in self.papu_bags:
@@ -164,6 +193,9 @@ class Game:
                             #it works
                             if (len(self.papu) - 1) >= 0:   
                                 self.active_papu = self.papu[len(self.papu) - 1]
+
+                    if event.key == pygame.K_g:
+                        self.hand_spawner.spawn_hand()
 
             pygame.display.update()
             self.clock.tick(60)
