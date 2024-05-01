@@ -13,7 +13,7 @@ To-Do List:
 • Randomize the color of the hand  •• ( Done )
 • Create a specific station for the papu is next state  •••••
 • Make the layout ( Art )  ••••
-• Randomise the spawn of the papu ( possibility of broke papu )
+• Randomise the spawn of the papu ( possibility of broke papu ) ( Done )
 • Make a trash to dispose waste ( once this is made it fixes bug #2)
 
 (later)
@@ -27,7 +27,6 @@ To-Do List:
 Bugs:
 • #1 Plate and papus stick together and are hard to be moved ( happens when the papu or the plate is moved over the other one )
 • #2 The destroyed papu can be placed on the plate ( fix with the trash to dispose ) ( easy to fix and should be changed after trash is made)
-• #3 Plate is not properly centered on the hand ( size issue of the plate )
 
 """
 
@@ -36,9 +35,9 @@ class Game:
         pygame.init()
 
         pygame.display.set_caption("Pani Puri Rush")
-        self.display = pygame.display.set_mode((400, 560))
+        self.display = pygame.display.set_mode((780, 596))
 
-        self.win_size = [400, 560]
+        self.win_size = [780, 596]
 
         self.assets = {
             'plate': load_image("plate/plate.png"),
@@ -49,7 +48,7 @@ class Game:
 
         self.hand_spawner = HandSpanwer(self)
 
-        self.hands = [Hand(self, (0, 300), (164, 56))]
+        self.hands = []
 
         self.plates = [Plate(self, (100, 100), (50, 50))]
         self.active_plate = None
@@ -83,7 +82,7 @@ class Game:
                 plate.update()
                 if not plate.on_hand[0]:
                     for hand in self.hands:
-                        if not hand.flip and not hand.rotate:
+                        if not hand.flip and not hand.rotate[0]:
                             if plate.rect().collidepoint((hand.rect().centerx + 30, hand.rect().centery - 20)):
                                 plate.render(self.display, (hand.rect().centerx + 30, hand.rect().centery - 20))
                                 plate.on_hand = [True, hand]
@@ -92,7 +91,7 @@ class Game:
                             else:
                                 plate.render(self.display, plate.pos)
 
-                        elif hand.rotate:
+                        elif hand.rotate[0] and hand.rotate[1]:
                             if plate.rect().collidepoint((hand.rect().centerx - 30, hand.rect().centery + 30)):
                                 plate.render(self.display, (hand.rect().centerx - 30, hand.rect().centery + 30))
                                 plate.on_hand = [True, hand]
@@ -110,15 +109,27 @@ class Game:
                             else:
                                 plate.render(self.display, plate.pos)
 
+                        elif hand.rotate[0] and not hand.rotate[1]:
+                            if plate.rect().collidepoint((hand.rect().centerx - 20, hand.rect().centery - 75)):
+                                plate.render(self.display, (hand.rect().centerx - 20, hand.rect().centery - 75))
+                                plate.on_hand = [True, hand]
+                                hand.has_plate = [True, plate]
+
+                            else:
+                                plate.render(self.display, plate.pos)
+
                 else:
-                    if not plate.on_hand[1].flip and not plate.on_hand[1].rotate:
+                    if not plate.on_hand[1].flip and not plate.on_hand[1].rotate[0]:
                         plate.render(self.display, (plate.on_hand[1].rect().centerx + 30, plate.on_hand[1].rect().centery - 20))
 
-                    elif plate.on_hand[1].rotate:
+                    elif plate.on_hand[1].rotate[0] and plate.on_hand[1].rotate[1]:
                         plate.render(self.display, (plate.on_hand[1].rect().centerx - 30, plate.on_hand[1].rect().centery + 30))
                     
                     elif plate.on_hand[1].flip:
                         plate.render(self.display, (plate.on_hand[1].rect().centerx - 80, plate.on_hand[1].rect().centery - 20))
+
+                    elif plate.on_hand[1].rotate[0] and not plate.on_hand[1].rotate[1]:
+                        plate.render(self.display, (plate.on_hand[1].rect().centerx - 20, plate.on_hand[1].rect().centery - 75))
 
             # renders the pani puri bags
             for papu_bag in self.papu_bags:
