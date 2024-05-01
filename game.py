@@ -40,10 +40,11 @@ class Game:
         self.win_size = [780, 596]
 
         self.assets = {
+            'workstatoin': load_image("workstation.png"),
             'plate': load_image("plate/plate.png"),
             'papus': load_images("panipuri"),
             'bags': load_images("panipuribag"),
-            'hands': load_images("hands"),
+            'hands': load_images("hands")
         }
 
         self.hand_spawner = HandSpanwer(self)
