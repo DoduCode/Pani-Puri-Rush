@@ -3,7 +3,7 @@ import sys
 import pygame
 
 from scripts.utils import load_image, load_images
-from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand, HandSpanwer
+from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand, HandSpanwer, WorkStation
    
 """
 To-Do List:
@@ -40,12 +40,14 @@ class Game:
         self.win_size = [780, 596]
 
         self.assets = {
-            'workstatoin': load_image("workstation.png"),
+            'workstation': load_image("workstation.png"),
             'plate': load_image("plate/plate.png"),
             'papus': load_images("panipuri"),
             'bags': load_images("panipuribag"),
             'hands': load_images("hands")
         }
+
+        # self.workstation = WorkStation(self, ((self.win_size[0] // 2) - (350 // 2), (self.win_size[1] // 2) - (200 // 2)), (350, 200))
 
         self.hand_spawner = HandSpanwer(self)
 
@@ -73,6 +75,8 @@ class Game:
             self.display.fill((5, 129, 173))
 
             self.mpos = pygame.mouse.get_pos()
+
+            self.workstation.render(self.display)
 
             for hand in self.hands:
                 hand.update()
@@ -158,8 +162,36 @@ class Game:
                 else:
                     papu.render(self.display, (papu.on_plate[1].rect().centerx - 25, papu.on_plate[1].rect().centery - 25))
                     if not papu.on_plate[1].is_active:
-                        if plate.rect().x <= -40:
-                            if (len(self.papu) - 1) >= 0:
+                        if not plate.on_hand[1].flip and not plate.on_hand[1].rotate[0]:
+                            if plate.rect().x <= -40:
+                                if (len(self.papu) - 1) >= 0:
+                                    self.papu.remove(papu)
+                                    plate.is_active = False
+                                    plate.has_papu[1] = None
+                                    #it works
+                                    if (len(self.papu) - 1) >= 0:   
+                                        self.active_papu = self.papu[len(self.papu) - 1]
+
+                        elif plate.on_hand[1].rotate[0] and plate.on_hand[1].rotate[1]:
+                            if plate.rect().y <= -40:
+                                self.papu.remove(papu)
+                                plate.is_active = False
+                                plate.has_papu[1] = None
+                                #it works
+                                if (len(self.papu) - 1) >= 0:   
+                                    self.active_papu = self.papu[len(self.papu) - 1]
+
+                        elif plate.on_hand[1].flip:
+                            if plate.rect().x >= self.win_size[0] + 20:
+                                self.papu.remove(papu)
+                                plate.is_active = False
+                                plate.has_papu[1] = None
+                                #it works
+                                if (len(self.papu) - 1) >= 0:   
+                                    self.active_papu = self.papu[len(self.papu) - 1]
+
+                        elif plate.on_hand[1].rotate[0] and not plate.on_hand[1].rotate[1]:
+                            if plate.rect().y >= self.win_size[1] + 20:
                                 self.papu.remove(papu)
                                 plate.is_active = False
                                 plate.has_papu[1] = None
