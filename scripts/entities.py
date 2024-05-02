@@ -2,6 +2,18 @@ import random
 
 import pygame
 
+# class WorkStation:
+#     def __init__(self, game, pos, size):
+#         self.game = game
+#         self.pos = list(pos)
+#         self.size = size
+
+#     def rect(self):
+#         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
+
+#     def render(self, surf):
+#         surf.blit(pygame.transform.scale(self.game.assets['workstation'], self.size), self.pos)
+
 class HandSpanwer:
     def __init__(self, game, count = 1):
         self.game = game
@@ -117,11 +129,33 @@ class Hand:
     def update(self):
         if not (self.has_plate[1] is None):
             if not self.has_plate[1].is_active:
-                if self.rect().centerx >= -100:
-                    self.pos[0] -= 2
+                if not self.flip and not self.rotate[0]:
+                    if self.rect().centerx >= -100:
+                        self.pos[0] -= 2
 
-                else:
-                    self.has_plate[1].is_active = True
+                    else:
+                        self.has_plate[1].is_active = True
+
+                if self.rotate[0] and self.rotate[1]:
+                    if self.rect().centery >= - 100:
+                        self.pos[1] -= 2
+
+                    else:
+                        self.has_plate[1].is_active = True
+
+                if self.flip:
+                    if self.rect().centerx <= self.game.win_size[0] + 100:
+                        self.pos[0] += 2
+
+                    else:
+                        self.has_plate[1].is_active = True
+
+                if self.rotate[0] and not self.rotate[1]:
+                    if self.rect().centery <= self.game.win_size[1] + 100:
+                        self.pos[1] += 2
+
+                    else:
+                        self.has_plate[1].is_active = True
 
             else:
                 self.move_hand()
