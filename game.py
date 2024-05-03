@@ -47,16 +47,17 @@ class Game:
             'hands': load_images("hands")
         }
 
-        # self.workstation = WorkStation(self, ((self.win_size[0] // 2) - (350 // 2), (self.win_size[1] // 2) - (200 // 2)), (350, 200))
+        # 3:2
+        self.workstation = WorkStation(self, ((self.win_size[0] // 2) - (360 // 2), (self.win_size[1] // 2) - (240 // 2)), (360, 240))
 
         self.hand_spawner = HandSpanwer(self)
 
         self.hands = []
 
-        self.plates = [Plate(self, (100, 100), (50, 50))]
+        self.plates = [Plate(self, (378, 186), (50, 50))]
         self.active_plate = None
 
-        self.papu_bags = [PaniPuriBag(self, (100, 100), (97, 69), 15), InfPaniPuriBag(self, (0, 0), (0, 0))]
+        self.papu_bags = [PaniPuriBag(self, (20 + self.workstation.rect().x, 130 + self.workstation.rect().y), (96, 69), 15), InfPaniPuriBag(self, (0, 0), (0, 0))]
 
         self.papu = []
         self.max_papu = 32
@@ -81,6 +82,11 @@ class Game:
             for hand in self.hands:
                 hand.update()
                 hand.render(self.display)
+
+            # renders the pani puri bags
+            for papu_bag in self.papu_bags:
+                papu_bag.update()
+                papu_bag.render(self.display)
 
             #renders all the plates
             for plate in self.plates:
@@ -121,7 +127,10 @@ class Game:
                                 hand.has_plate = [True, plate]
 
                             else:
-                                plate.render(self.display, plate.pos)
+                                plate.render(self.display, plate.pos)           
+
+                    if len(self.hands) == 0:
+                        plate.render(self.display, (378, 186))
 
                 else:
                     if not plate.on_hand[1].flip and not plate.on_hand[1].rotate[0]:
@@ -135,11 +144,6 @@ class Game:
 
                     elif plate.on_hand[1].rotate[0] and not plate.on_hand[1].rotate[1]:
                         plate.render(self.display, (plate.on_hand[1].rect().centerx - 20, plate.on_hand[1].rect().centery - 75))
-
-            # renders the pani puri bags
-            for papu_bag in self.papu_bags:
-                papu_bag.update()
-                papu_bag.render(self.display)
 
             # renders all the pani puri sprites
             for papu in self.papu:
