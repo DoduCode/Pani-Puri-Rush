@@ -2,17 +2,17 @@ import random
 
 import pygame
 
-# class WorkStation:
-#     def __init__(self, game, pos, size):
-#         self.game = game
-#         self.pos = list(pos)
-#         self.size = size
+class WorkStation:
+    def __init__(self, game, pos, size):
+        self.game = game
+        self.pos = list(pos)
+        self.size = size
 
-#     def rect(self):
-#         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
+    def rect(self):
+        return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
 
-#     def render(self, surf):
-#         surf.blit(pygame.transform.scale(self.game.assets['workstation'], self.size), self.pos)
+    def render(self, surf):
+        surf.blit(pygame.transform.scale(self.game.assets['workstation'], self.size), self.pos)
 
 class HandSpanwer:
     def __init__(self, game, count = 1):
@@ -209,7 +209,7 @@ class Plate:
         if self.is_mouse_active:
             self.pos[0] = self.game.mpos[0] - (self.size[0] // 2)
             self.pos[1] = self.game.mpos[1] - (self.size[1] // 2)
-
+            
     def render(self, surf, pos):
         self.pos = list(pos)
         surf.blit(pygame.transform.scale(self.game.assets['plate'], self.size), pos)
@@ -224,7 +224,7 @@ class PaniPuriBag:
         self.bag_state = 0
 
     def use_papu(self):
-        self.game.papu.append(PaniPuri(self.game, 0, self.game.mpos, (50, 50)))
+        self.game.papu.append(PaniPuri(self.game, 0, (self.pos[0] + 100, self.pos[1] - 10), (50, 50)))
         self.no_papu -= 1
         if self.no_papu <= 0:
             self.game.papu_bags.pop(0)
@@ -240,7 +240,7 @@ class PaniPuriBag:
             self.bag_state = 2
 
     def render(self, surf):
-        surf.blit(pygame.transform.scale(self.game.assets['bags'][self.bag_state], self.size), self.pos)
+        surf.blit(pygame.transform.rotate(pygame.transform.scale(self.game.assets['bags'][self.bag_state], self.size), 90), self.pos)
 
 class InfPaniPuriBag(PaniPuriBag):
     def use_papu(self):
