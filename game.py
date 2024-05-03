@@ -3,17 +3,17 @@ import sys
 import pygame
 
 from scripts.utils import load_image, load_images
-from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand
-
+from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand, HandSpanwer, WorkStation
+   
 """
 To-Do List:
 (now)
-• Make the hand spawner  •••
+• Make the hand spawner  ••• ( Done )
 • Make more hand colors  • ( Done )
 • Randomize the color of the hand  •• ( Done )
 • Create a specific station for the papu is next state  •••••
 • Make the layout ( Art )  ••••
-• Randomise the spawn of the papu ( possibility of broke papu )
+• Randomise the spawn of the papu ( possibility of broke papu ) ( Done )
 • Make a trash to dispose waste ( once this is made it fixes bug #2)
 
 (later)
@@ -27,7 +27,6 @@ To-Do List:
 Bugs:
 • #1 Plate and papus stick together and are hard to be moved ( happens when the papu or the plate is moved over the other one )
 • #2 The destroyed papu can be placed on the plate ( fix with the trash to dispose ) ( easy to fix and should be changed after trash is made)
-• #3 Plate is not properly centered on the hand ( size issue of the plate )
 
 """
 
@@ -36,21 +35,29 @@ class Game:
         pygame.init()
 
         pygame.display.set_caption("Pani Puri Rush")
-        self.display = pygame.display.set_mode((400, 560))
+        self.display = pygame.display.set_mode((780, 596))
+
+        self.win_size = [780, 596]
 
         self.assets = {
+            'workstation': load_image("workstation.png"),
             'plate': load_image("plate/plate.png"),
             'papus': load_images("panipuri"),
             'bags': load_images("panipuribag"),
-            'hands': load_images("hands"),
+            'hands': load_images("hands")
         }
 
-        self.hands = [Hand(self, (0, 300), (164, 56))]
+        # 3:2
+        self.workstation = WorkStation(self, ((self.win_size[0] // 2) - (360 // 2), (self.win_size[1] // 2) - (240 // 2)), (360, 240))
 
-        self.plates = [Plate(self, (100, 100), (50, 50))]
+        self.hand_spawner = HandSpanwer(self)
+
+        self.hands = []
+
+        self.plates = [Plate(self, (378, 186), (50, 50))]
         self.active_plate = None
 
-        self.papu_bags = [PaniPuriBag(self, (100, 100), (97, 69), 15), InfPaniPuriBag(self, (0, 0), (0, 0))]
+        self.papu_bags = [PaniPuriBag(self, (20 + self.workstation.rect().x, 130 + self.workstation.rect().y), (96, 69), 15), InfPaniPuriBag(self, (0, 0), (0, 0))]
 
         self.papu = []
         self.max_papu = 32
@@ -70,31 +77,73 @@ class Game:
 
             self.mpos = pygame.mouse.get_pos()
 
+            self.workstation.render(self.display)
+
             for hand in self.hands:
                 hand.update()
                 hand.render(self.display)
+
+            # renders the pani puri bags
+            for papu_bag in self.papu_bags:
+                papu_bag.update()
+                papu_bag.render(self.display)
 
             #renders all the plates
             for plate in self.plates:
                 plate.update()
                 if not plate.on_hand[0]:
                     for hand in self.hands:
-                        if plate.rect().collidepoint((hand.rect().centerx + 30, hand.rect().centery - 10)):
-                            plate.render(self.display, (hand.rect().centerx + 30, hand.rect().centery - 10))
-                            plate.on_hand = [True, hand]
-                            hand.has_plate = [True, plate]
+                        if not hand.flip and not hand.rotate[0]:
+                            if plate.rect().collidepoint((hand.rect().centerx + 30, hand.rect().centery - 20)):
+                                plate.render(self.display, (hand.rect().centerx + 30, hand.rect().centery - 20))
+                                plate.on_hand = [True, hand]
+                                hand.has_plate = [True, plate]
 
-                        else:
-                            plate.render(self.display, plate.pos)
+                            else:
+                                plate.render(self.display, plate.pos)
+
+                        elif hand.rotate[0] and hand.rotate[1]:
+                            if plate.rect().collidepoint((hand.rect().centerx - 30, hand.rect().centery + 30)):
+                                plate.render(self.display, (hand.rect().centerx - 30, hand.rect().centery + 30))
+                                plate.on_hand = [True, hand]
+                                hand.has_plate = [True, plate]
+
+                            else:
+                                plate.render(self.display, plate.pos)
+
+                        elif hand.flip:
+                            if plate.rect().collidepoint((hand.rect().centerx - 30, hand.rect().centery - 20)):
+                                plate.render(self.display, (hand.rect().centerx - 30, hand.rect().centery - 20))
+                                plate.on_hand = [True, hand]
+                                hand.has_plate = [True, plate]
+
+                            else:
+                                plate.render(self.display, plate.pos)
+
+                        elif hand.rotate[0] and not hand.rotate[1]:
+                            if plate.rect().collidepoint((hand.rect().centerx - 20, hand.rect().centery - 75)):
+                                plate.render(self.display, (hand.rect().centerx - 20, hand.rect().centery - 75))
+                                plate.on_hand = [True, hand]
+                                hand.has_plate = [True, plate]
+
+                            else:
+                                plate.render(self.display, plate.pos)           
+
+                    if len(self.hands) == 0:
+                        plate.render(self.display, (378, 186))
 
                 else:
-                    plate.render(self.display, (plate.on_hand[1].rect().centerx + 30, plate.on_hand[1].rect().centery - 10))
+                    if not plate.on_hand[1].flip and not plate.on_hand[1].rotate[0]:
+                        plate.render(self.display, (plate.on_hand[1].rect().centerx + 30, plate.on_hand[1].rect().centery - 20))
 
+                    elif plate.on_hand[1].rotate[0] and plate.on_hand[1].rotate[1]:
+                        plate.render(self.display, (plate.on_hand[1].rect().centerx - 30, plate.on_hand[1].rect().centery + 30))
+                    
+                    elif plate.on_hand[1].flip:
+                        plate.render(self.display, (plate.on_hand[1].rect().centerx - 80, plate.on_hand[1].rect().centery - 20))
 
-            # renders the pani puri bags
-            for papu_bag in self.papu_bags:
-                papu_bag.update()
-                papu_bag.render(self.display)
+                    elif plate.on_hand[1].rotate[0] and not plate.on_hand[1].rotate[1]:
+                        plate.render(self.display, (plate.on_hand[1].rect().centerx - 20, plate.on_hand[1].rect().centery - 75))
 
             # renders all the pani puri sprites
             for papu in self.papu:
@@ -117,8 +166,36 @@ class Game:
                 else:
                     papu.render(self.display, (papu.on_plate[1].rect().centerx - 25, papu.on_plate[1].rect().centery - 25))
                     if not papu.on_plate[1].is_active:
-                        if plate.rect().x <= -40:
-                            if (len(self.papu) - 1) >= 0:
+                        if not plate.on_hand[1].flip and not plate.on_hand[1].rotate[0]:
+                            if plate.rect().x <= -40:
+                                if (len(self.papu) - 1) >= 0:
+                                    self.papu.remove(papu)
+                                    plate.is_active = False
+                                    plate.has_papu[1] = None
+                                    #it works
+                                    if (len(self.papu) - 1) >= 0:   
+                                        self.active_papu = self.papu[len(self.papu) - 1]
+
+                        elif plate.on_hand[1].rotate[0] and plate.on_hand[1].rotate[1]:
+                            if plate.rect().y <= -40:
+                                self.papu.remove(papu)
+                                plate.is_active = False
+                                plate.has_papu[1] = None
+                                #it works
+                                if (len(self.papu) - 1) >= 0:   
+                                    self.active_papu = self.papu[len(self.papu) - 1]
+
+                        elif plate.on_hand[1].flip:
+                            if plate.rect().x >= self.win_size[0] + 20:
+                                self.papu.remove(papu)
+                                plate.is_active = False
+                                plate.has_papu[1] = None
+                                #it works
+                                if (len(self.papu) - 1) >= 0:   
+                                    self.active_papu = self.papu[len(self.papu) - 1]
+
+                        elif plate.on_hand[1].rotate[0] and not plate.on_hand[1].rotate[1]:
+                            if plate.rect().y >= self.win_size[1] + 20:
                                 self.papu.remove(papu)
                                 plate.is_active = False
                                 plate.has_papu[1] = None
@@ -164,6 +241,9 @@ class Game:
                             #it works
                             if (len(self.papu) - 1) >= 0:   
                                 self.active_papu = self.papu[len(self.papu) - 1]
+
+                    if event.key == pygame.K_g:
+                        self.hand_spawner.spawn_hand()
 
             pygame.display.update()
             self.clock.tick(60)
