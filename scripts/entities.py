@@ -2,6 +2,24 @@ import random
 
 import pygame
 
+from scripts.utils import circle_collision
+
+class Trash:
+    def __init__(self, game, pos, size):
+        self.game = game
+        self.pos = list(pos)
+        self.size = size
+
+        self.radius = (self.size[0] // 2)
+
+    def rect(self):
+        return pygame.rect.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
+
+    def render(self, surf):
+        pygame.draw.rect(surf, (255, 255, 255), (self.pos[0], self.pos[1], self.size[0], self.size[1]))
+        pygame.draw.rect(surf, (255, 80, 34, 0), (self.pos[0] + 1, self.pos[1] + 1, self.size[0] - 2, self.size[1] - 2))
+
+
 class WorkStation:
     def __init__(self, game, pos, size):
         self.game = game
@@ -268,6 +286,11 @@ class PaniPuri:
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
     
     def update(self):
+        if self.img == self.game.assets['papus'][3]:
+            if self.rect().colliderect(self.game.trash.rect()):
+                if circle_collision(1, self.game.trash.radius, self.pos, self.game.trash.pos) and not self.is_mouse_active:
+                    self.game.papu.remove(self)
+
         if not self.on_plate[0]:
             if self.game.clicking and (not self.game.mouse_busy or self.is_active):
                 if self.rect().collidepoint(self.game.mpos):

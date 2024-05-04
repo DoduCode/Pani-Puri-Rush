@@ -3,7 +3,7 @@ import sys
 import pygame
 
 from scripts.utils import load_image, load_images
-from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand, HandSpanwer, WorkStation
+from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand, HandSpanwer, WorkStation, Trash
    
 """
 To-Do List:
@@ -36,6 +36,7 @@ class Game:
 
         pygame.display.set_caption("Pani Puri Rush")
         self.display = pygame.display.set_mode((780, 596))
+        self.display_1 = pygame.Surface((780, 596), pygame.SRCALPHA)
 
         self.win_size = [780, 596]
 
@@ -49,6 +50,8 @@ class Game:
 
         # 3:2
         self.workstation = WorkStation(self, ((self.win_size[0] // 2) - (360 // 2), (self.win_size[1] // 2) - (240 // 2)), (360, 240))
+        
+        self.trash = Trash(self, (self.workstation.rect().x + 13, self.workstation.rect().y + 18), (82, 82))  # radius is 41
 
         self.hand_spawner = HandSpanwer(self)
 
@@ -207,6 +210,10 @@ class Game:
             if not self.mouse_active_papu is None:
                 self.mouse_active_papu.update()
                 self.mouse_active_papu.render(self.display, self.mouse_active_papu.pos)
+            
+            self.trash.render(self.display_1)
+
+            self.display.blit(self.display_1, (0, 0))
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
