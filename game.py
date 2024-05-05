@@ -3,7 +3,7 @@ import sys
 import pygame
 
 from scripts.utils import load_image, load_images
-from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand, HandSpanwer, WorkStation, Trash
+from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand, HandSpanwer, WorkStation
    
 """
 To-Do List:
@@ -12,9 +12,9 @@ To-Do List:
 • Make more hand colors  • ( Done )
 • Randomize the color of the hand  •• ( Done )
 • Create a specific station for the papu is next state  •••••
-• Make the layout ( Art )  ••••
+• Make the layout ( Art )  •••• ( Done )
 • Randomise the spawn of the papu ( possibility of broke papu ) ( Done )
-• Make a trash to dispose waste ( once this is made it fixes bug #2)
+• Make a trash to dispose waste ( once this is made it fixes bug #2) ( Done )
 
 (later)
 • Add a rating system
@@ -48,10 +48,15 @@ class Game:
             'hands': load_images("hands")
         }
 
+
         # 3:2
         self.workstation = WorkStation(self, ((self.win_size[0] // 2) - (360 // 2), (self.win_size[1] // 2) - (240 // 2)), (360, 240))
         
-        self.trash = Trash(self, (self.workstation.rect().x + 13, self.workstation.rect().y + 18), (82, 82))  # radius is 41
+        # self.trash = Trash(self, (self.workstation.rect().x + 13, self.workstation.rect().y + 18), (82, 82))  # radius is 41
+        self.trash = pygame.rect.Rect(self.workstation.rect().x + 13, self.workstation.rect().y + 18, 82, 82)
+        self.chole = pygame.rect.Rect(self.workstation.rect().topright[0] - 95, self.workstation.rect().topright[1] + 30, 90, 90)
+        self.pani = pygame.rect.Rect(self.workstation.rect().topright[0] - 95, self.workstation.rect().topright[1] + 120, 90, 90)
+        self.stove = [self.chole, self.pani]
 
         self.hand_spawner = HandSpanwer(self)
 
@@ -210,10 +215,6 @@ class Game:
             if not self.mouse_active_papu is None:
                 self.mouse_active_papu.update()
                 self.mouse_active_papu.render(self.display, self.mouse_active_papu.pos)
-            
-            self.trash.render(self.display_1)
-
-            self.display.blit(self.display_1, (0, 0))
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
