@@ -239,7 +239,7 @@ class Game:
                             self.active_papu.next_state()
 
                     if event.key == pygame.K_d:
-                        self.papu_bags.insert(-2, PaniPuriBag(self, (100, 100), (97, 69), 15))
+                        self.papu_bags.insert(-2, PaniPuriBag(self, (20 + self.workstation.rect().x, 130 + self.workstation.rect().y), (96, 69), 15))
 
                     if event.key == pygame.K_f:
                         if (len(self.papu) - 1) >= 0:
