@@ -4,22 +4,6 @@ import pygame
 
 from scripts.utils import circle_collision
 
-class Trash:
-    def __init__(self, game, pos, size):
-        self.game = game
-        self.pos = list(pos)
-        self.size = size
-
-        self.radius = (self.size[0] // 2)
-
-    def rect(self):
-        return pygame.rect.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
-
-    def render(self, surf):
-        pass
-        # pygame.draw.rect(surf, (255, 255, 255), (self.pos[0], self.pos[1], self.size[0], self.size[1]))
-        # pygame.draw.rect(surf, (255, 80, 34, 0), (self.pos[0] + 1, self.pos[1] + 1, self.size[0] - 2, self.size[1] - 2))
-
 class WorkStation:
     def __init__(self, game, pos, size):
         self.game = game
@@ -279,6 +263,13 @@ class PaniPuri:
         self.game.active_papu = self
         self.on_plate = [False, None]
 
+    def check_next_state(self):
+        if self.rect().colliderect(self.game.chole) and self.papu_state == 0:
+            self.next_state()
+
+        elif self.rect().colliderect(self.game.pani) and self.papu_state == 1:
+            self.next_state()
+
     def next_state(self):
         self.papu_state = min(2, self.papu_state + 1)
 
@@ -286,8 +277,8 @@ class PaniPuri:
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
     
     def update(self):
-        if self.rect().colliderect(self.game.trash.rect()):
-            if circle_collision(1, self.game.trash.radius, self.rect().center, self.game.trash.rect().center) and not self.is_mouse_active:
+        if self.rect().colliderect(self.game.trash):
+            if circle_collision(1, self.game.trash.midright[0] - self.game.trash.x, self.rect().center, self.game.trash.center) and not self.is_mouse_active:
                 self.game.papu.remove(self)
 
         if not self.on_plate[0]:
