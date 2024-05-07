@@ -263,6 +263,13 @@ class PaniPuri:
         self.game.active_papu = self
         self.on_plate = [False, None]
 
+    def check_next_state(self):
+        if self.rect().colliderect(self.game.chole) and self.papu_state == 0:
+            self.next_state()
+
+        elif self.rect().colliderect(self.game.pani) and self.papu_state == 1:
+            self.next_state()
+
     def next_state(self):
         self.papu_state = min(2, self.papu_state + 1)
 

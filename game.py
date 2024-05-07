@@ -11,7 +11,7 @@ To-Do List:
 • Make the hand spawner  ••• ( Done )
 • Make more hand colors  • ( Done )
 • Randomize the color of the hand  •• ( Done )
-• Create a specific station for the papu is next state  •••••
+• Create a specific station for the papu is next state  ••••• ( Done )
 • Make the layout ( Art )  •••• ( Done )
 • Randomise the spawn of the papu ( possibility of broke papu ) ( Done )
 • Make a trash to dispose waste ( once this is made it fixes bug #2) ( Done )
@@ -237,7 +237,7 @@ class Game:
 
                     if event.key == pygame.K_a:
                         if not (self.active_papu is None):
-                            self.active_papu.next_state()
+                            self.active_papu.check_next_state()
 
                     if event.key == pygame.K_d:
                         self.papu_bags.insert(-2, PaniPuriBag(self, (20 + self.workstation.rect().x, 130 + self.workstation.rect().y), (96, 69), 15))
