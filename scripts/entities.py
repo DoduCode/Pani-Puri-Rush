@@ -257,7 +257,6 @@ class PaniPuri:
 
         self.img = self.game.assets['papus'][0] if random.random() > 0.1 else self.game.assets['papus'][3]
 
-        self.is_active = False
         self.is_mouse_active = False
 
         self.game.active_papu = self
@@ -282,9 +281,8 @@ class PaniPuri:
                 self.game.papu.remove(self)
 
         if not self.on_plate[0]:
-            if self.game.clicking and (not self.game.mouse_busy or self.is_active):
+            if self.game.clicking and ((not self.game.mouse_busy) or self.game.active_papu == self):
                 if self.rect().collidepoint(self.game.mpos):
-                    self.is_active = True
                     self.is_mouse_active = True
                     self.game.mouse_busy = True
                     self.game.mouse_active_papu = self
