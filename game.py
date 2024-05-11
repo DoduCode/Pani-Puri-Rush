@@ -148,8 +148,8 @@ class Game:
                 papu.update()
                 if not papu.on_plate[0]:
                     for plate in self.plates:
-                        if plate.on_hand and self.mouse_active_papu is None:
-                            if plate.rect().collidepoint(papu.rect().center) and plate.on_hand and plate.has_papu[1] is None:
+                        if plate.on_hand[0] and self.mouse_active_papu is None:
+                            if plate.rect().collidepoint(papu.rect().center) and plate.on_hand[0] and plate.has_papu[1] is None:
                                 papu.on_plate = [True, plate]
                                 papu.render(self.display, (plate.rect().centerx - 25, plate.rect().centery - 25))
                                 plate.is_active = False
