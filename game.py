@@ -7,16 +7,7 @@ from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand,
    
 """
 To-Do List:
-(now)
-• Make the hand spawner  ••• ( Done )
-• Make more hand colors  • ( Done )
-• Randomize the color of the hand  •• ( Done )
-• Create a specific station for the papu is next state  ••••• ( Done )
-• Make the layout ( Art )  •••• ( Done )
-• Randomise the spawn of the papu ( possibility of broke papu ) ( Done )
-• Make a trash to dispose waste ( once this is made it fixes bug #2) ( Done )
-
-(later)
+(Now)
 • Add a rating system
 • Create days (level changing)  ••
 • Add a currency  •
@@ -47,7 +38,6 @@ class Game:
             'bags': load_images("panipuribag"),
             'hands': load_images("hands")
         }
-
 
         # 3:2
         self.workstation = WorkStation(self, ((self.win_size[0] // 2) - (360 // 2), (self.win_size[1] // 2) - (240 // 2)), (360, 240))
