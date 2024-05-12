@@ -1,6 +1,9 @@
 import random
+import math
 
 import pygame
+
+from scripts.utils import circle_collision
 
 class WorkStation:
     def __init__(self, game, pos, size):
@@ -252,14 +255,21 @@ class PaniPuri:
         self.papu_state = papu_state
         self.pos = list(pos)
         self.size = size
+        self.velocity = [0, 0]
 
         self.img = self.game.assets['papus'][0] if random.random() > 0.1 else self.game.assets['papus'][3]
 
-        self.is_active = False
         self.is_mouse_active = False
 
         self.game.active_papu = self
         self.on_plate = [False, None]
+
+    def check_next_state(self):
+        if self.rect().colliderect(self.game.chole) and self.papu_state == 0:
+            self.next_state()
+
+        elif self.rect().colliderect(self.game.pani) and self.papu_state == 1:
+            self.next_state()
 
     def next_state(self):
         self.papu_state = min(2, self.papu_state + 1)
@@ -268,10 +278,21 @@ class PaniPuri:
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
     
     def update(self):
+        if self.rect().colliderect(self.game.trash):
+            if circle_collision(1, self.game.trash.size[0] // 2, self.rect().center, self.game.trash.center)[0] and not self.is_mouse_active:
+                self.game.papu.remove(self)
+
         if not self.on_plate[0]:
-            if self.game.clicking and (not self.game.mouse_busy or self.is_active):
+            if self.game.mouse_active_papu is not None and self.game.mouse_active_papu != self:
+                if self.rect().colliderect(self.game.mouse_active_papu):
+                    s_bool, dis, a = circle_collision(self.rect().size[0] // 2, self.game.mouse_active_papu.rect().size[0] // 2, self.rect().center, self.game.mouse_active_papu.rect().center, angle = True)
+                    if s_bool:
+                        multiplier = (((self.rect().size[0] // 2) + (self.game.mouse_active_papu.rect().size[0] // 2)) - dis)
+                        self.velocity[0] += (multiplier * 0.15) * math.cos(a + 90)
+                        self.velocity[1] += (multiplier * 0.15) * math.sin(a + 90)
+        
+            if self.game.clicking and ((not self.game.mouse_busy) or self.game.active_papu == self):
                 if self.rect().collidepoint(self.game.mpos):
-                    self.is_active = True
                     self.is_mouse_active = True
                     self.game.mouse_busy = True
                     self.game.mouse_active_papu = self
@@ -286,6 +307,25 @@ class PaniPuri:
             if self.is_mouse_active:
                 self.pos[0] = self.game.mpos[0] - (self.size[0] // 2)
                 self.pos[1] = self.game.mpos[1] - (self.size[1] // 2)
+
+            self.pos[0] += self.velocity[0]
+            self.pos[1] += self.velocity[1]
+
+            if self.velocity[0] > 0:
+                self.velocity[0] = max(self.velocity[0] - 0.6, 0)
+            
+            else:
+                self.velocity[0] = min(self.velocity[0] + 0.6, 0)
+
+            if self.velocity[1] > 0:
+                self.velocity[1] = max(self.velocity[1] - 0.6, 0)
+            
+            else:
+                self.velocity[1] = min(self.velocity[1] + 0.6, 0)
+
+            if self.rect().colliderect(self.game.workstation.rect()) and not self.game.workstation.rect().contains(self.rect()):
+                self.velocity[0] = -self.velocity[0]
+                self.velocity[1] = -self.velocity[1]
 
     def render(self, surf, pos):
         if self.img == self.game.assets['papus'][0]:

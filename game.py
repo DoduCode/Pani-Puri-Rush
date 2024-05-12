@@ -2,21 +2,12 @@ import sys
 
 import pygame
 
-from scripts.utils import load_image, load_images
+from scripts.utils import load_image, load_images, draw_rect
 from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand, HandSpanwer, WorkStation
    
 """
 To-Do List:
-(now)
-• Make the hand spawner  ••• ( Done )
-• Make more hand colors  • ( Done )
-• Randomize the color of the hand  •• ( Done )
-• Create a specific station for the papu is next state  •••••
-• Make the layout ( Art )  ••••
-• Randomise the spawn of the papu ( possibility of broke papu ) ( Done )
-• Make a trash to dispose waste ( once this is made it fixes bug #2)
-
-(later)
+(Now)
 • Add a rating system
 • Create days (level changing)  ••
 • Add a currency  •
@@ -36,6 +27,8 @@ class Game:
 
         pygame.display.set_caption("Pani Puri Rush")
         self.display = pygame.display.set_mode((780, 596))
+        self.display_1 = pygame.Surface((780, 596), pygame.SRCALPHA)
+        self.display_1.set_colorkey((255, 255, 20))
 
         self.win_size = [780, 596]
 
@@ -49,6 +42,12 @@ class Game:
 
         # 3:2
         self.workstation = WorkStation(self, ((self.win_size[0] // 2) - (360 // 2), (self.win_size[1] // 2) - (240 // 2)), (360, 240))
+        
+        # self.trash = Trash(self, (self.workstation.rect().x + 13, self.workstation.rect().y + 18), (82, 82))  # radius is 41
+        self.trash = pygame.rect.Rect(self.workstation.rect().x + 13, self.workstation.rect().y + 18, 82, 82)
+        self.chole = pygame.rect.Rect(self.workstation.rect().topright[0] - 95, self.workstation.rect().topright[1] + 30, 90, 90)
+        self.pani = pygame.rect.Rect(self.workstation.rect().topright[0] - 95, self.workstation.rect().topright[1] + 120, 90, 90)
+        self.stove = [self.chole, self.pani]
 
         self.hand_spawner = HandSpanwer(self)
 
@@ -150,8 +149,8 @@ class Game:
                 papu.update()
                 if not papu.on_plate[0]:
                     for plate in self.plates:
-                        if plate.on_hand and self.mouse_active_papu is None:
-                            if plate.rect().collidepoint(papu.rect().center) and plate.on_hand and plate.has_papu[1] is None:
+                        if plate.on_hand[0] and self.mouse_active_papu is None:
+                            if plate.rect().collidepoint(papu.rect().center) and plate.on_hand[0] and plate.has_papu[1] is None:
                                 papu.on_plate = [True, plate]
                                 papu.render(self.display, (plate.rect().centerx - 25, plate.rect().centery - 25))
                                 plate.is_active = False
@@ -207,7 +206,7 @@ class Game:
             if not self.mouse_active_papu is None:
                 self.mouse_active_papu.update()
                 self.mouse_active_papu.render(self.display, self.mouse_active_papu.pos)
-            
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -229,10 +228,10 @@ class Game:
 
                     if event.key == pygame.K_a:
                         if not (self.active_papu is None):
-                            self.active_papu.next_state()
+                            self.active_papu.check_next_state()
 
                     if event.key == pygame.K_d:
-                        self.papu_bags.insert(-2, PaniPuriBag(self, (100, 100), (97, 69), 15))
+                        self.papu_bags.insert(-2, PaniPuriBag(self, (20 + self.workstation.rect().x, 130 + self.workstation.rect().y), (96, 69), 15))
 
                     if event.key == pygame.K_f:
                         if (len(self.papu) - 1) >= 0:
@@ -245,6 +244,7 @@ class Game:
                     if event.key == pygame.K_g:
                         self.hand_spawner.spawn_hand()
 
+            self.display.blit(self.display_1, (0, 0))
             pygame.display.update()
             self.clock.tick(60)
 
