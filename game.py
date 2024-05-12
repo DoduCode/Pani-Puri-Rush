@@ -244,7 +244,7 @@ class Game:
                     if event.key == pygame.K_g:
                         self.hand_spawner.spawn_hand()
 
-            # self.display.blit(self.display_1, (0, 0))
+            self.display.blit(self.display_1, (0, 0))
             pygame.display.update()
             self.clock.tick(60)
 
