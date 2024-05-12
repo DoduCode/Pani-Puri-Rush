@@ -10,9 +10,6 @@ def load_image(path):
     img.set_colorkey((0, 0, 0))
     return img
 
-def randomise_hand(self, img):
-    pass
-
 def load_images(path):
     images = []
     for img in sorted(os.listdir(BASE_IMG_PATH + path)):
@@ -25,7 +22,11 @@ def circle_collision(radius_1, radius_2, pos_1, pos_2):
     hy = math.sqrt((s1 ** 2) + ( s2 ** 2))
 
     if hy < (radius_1 + radius_2):
-        return True
+        return [True, hy]
     
     else:
-        return False
+        return [False, hy]
+    
+def draw_rect(surf, rect: pygame.rect.Rect):
+    pygame.draw.rect(surf, (255, 255, 255), rect)
+    pygame.draw.rect(surf, (255, 255, 20), (rect.x + 1, rect.y + 1, rect.size[0] - 2, rect.size[1] - 2))
