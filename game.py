@@ -2,7 +2,7 @@ import sys
 
 import pygame
 
-from scripts.utils import load_image, load_images
+from scripts.utils import load_image, load_images, draw_rect
 from scripts.entities import PaniPuri, PaniPuriBag, InfPaniPuriBag, Plate, Hand, HandSpanwer, WorkStation
    
 """
@@ -28,6 +28,7 @@ class Game:
         pygame.display.set_caption("Pani Puri Rush")
         self.display = pygame.display.set_mode((780, 596))
         self.display_1 = pygame.Surface((780, 596), pygame.SRCALPHA)
+        self.display_1.set_colorkey((255, 255, 20))
 
         self.win_size = [780, 596]
 
@@ -205,7 +206,7 @@ class Game:
             if not self.mouse_active_papu is None:
                 self.mouse_active_papu.update()
                 self.mouse_active_papu.render(self.display, self.mouse_active_papu.pos)
-            
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -243,6 +244,7 @@ class Game:
                     if event.key == pygame.K_g:
                         self.hand_spawner.spawn_hand()
 
+            # self.display.blit(self.display_1, (0, 0))
             pygame.display.update()
             self.clock.tick(60)
 
