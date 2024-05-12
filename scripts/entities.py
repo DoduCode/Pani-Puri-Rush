@@ -277,7 +277,7 @@ class PaniPuri:
     
     def update(self):
         if self.rect().colliderect(self.game.trash):
-            if circle_collision(1, self.game.trash.midright[0] - self.game.trash.x, self.rect().center, self.game.trash.center) and not self.is_mouse_active:
+            if circle_collision(1, self.game.trash.size[0] // 2, self.rect().center, self.game.trash.center)[0] and not self.is_mouse_active:
                 self.game.papu.remove(self)
 
         if not self.on_plate[0]:
